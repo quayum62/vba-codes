@@ -1,0 +1,52 @@
+Sub Extract_K3_I8_Data()
+
+    Dim ws As Worksheet
+    Dim analysisWs As Worksheet
+    Dim nextRow As Long
+    
+    'Create analysis sheet if it doesn't exist
+    On Error Resume Next
+    Set analysisWs = ThisWorkbook.Worksheets("analysis")
+    On Error GoTo 0
+    
+    If analysisWs Is Nothing Then
+        Set analysisWs = ThisWorkbook.Worksheets.Add
+        analysisWs.Name = "analysis"
+    End If
+    
+    'Clear old data
+    analysisWs.Cells.Clear
+    
+    'Create headers
+    analysisWs.Range("A1").Value = "Sheet Name"
+    analysisWs.Range("B1").Value = "K3"
+    analysisWs.Range("C1").Value = "I8"
+    
+    nextRow = 2
+    
+    'Loop through all sheets
+    For Each ws In ThisWorkbook.Worksheets
+        
+        'Skip analysis sheet
+        If ws.Name <> "analysis" Then
+            
+            analysisWs.Cells(nextRow, 1).Value = ws.Name
+            analysisWs.Cells(nextRow, 2).Value = ws.Range("K3").Value
+            analysisWs.Cells(nextRow, 3).Value = ws.Range("I8").Value
+            
+            nextRow = nextRow + 1
+            
+        End If
+        
+    Next ws
+    
+    'Format as table
+    Dim tblRange As Range
+    Set tblRange = analysisWs.Range("A1:C" & nextRow - 1)
+    
+    analysisWs.ListObjects.Add(xlSrcRange, tblRange, , xlYes).Name = "Analysis_Table"
+    analysisWs.Columns.AutoFit
+    
+    MsgBox "Extraction complete!", vbInformation
+
+End Sub
