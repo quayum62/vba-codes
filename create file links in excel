@@ -1,0 +1,58 @@
+Sub Create_File_Links()
+
+    Dim ws As Worksheet
+    Dim folderPath As String
+    Dim lastRow As Long
+    Dim i As Long
+    Dim fileName As String
+    Dim foundFile As String
+    Dim fullPath As String
+    
+    'Settings
+    Set ws = ThisWorkbook.Worksheets("Analysis")
+    
+    folderPath = "C:\Users\bxb9893\OneDrive - JT International\Documents\!Tahseen Quayum\5000 IMS & QMS\QUIP\All QUIP CAPAs\"
+    
+    'Find last row in column I
+    lastRow = ws.Cells(ws.Rows.Count, "I").End(xlUp).Row
+    
+    'Clear old results
+    ws.Range("J2:J" & lastRow).ClearContents
+    ws.Range("J2:J" & lastRow).Interior.ColorIndex = xlNone
+    
+    'Loop through file names
+    For i = 2 To lastRow   'assuming row 1 has headers
+        
+        fileName = Trim(ws.Cells(i, "I").Value)
+        
+        If fileName <> "" Then
+            
+            'Find file (with or without extension)
+            foundFile = Dir(folderPath & fileName & "*")
+            
+            If foundFile <> "" Then
+                
+                fullPath = folderPath & foundFile
+                
+                'Create hyperlink
+                ws.Hyperlinks.Add _
+                    Anchor:=ws.Cells(i, "J"), _
+                    Address:=fullPath, _
+                    TextToDisplay:=foundFile
+                
+                ws.Cells(i, "J").Interior.ColorIndex = xlNone
+                
+            Else
+                
+                ws.Cells(i, "J").Value = "NOT FOUND"
+                ws.Cells(i, "J").Interior.Color = RGB(255, 0, 0)
+                
+            End If
+            
+        End If
+        
+    Next i
+    
+    MsgBox "File linking completed.", vbInformation
+
+End Sub
