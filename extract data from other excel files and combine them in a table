@@ -1,0 +1,82 @@
+Sub Extract_QUIP_CAPA_Data()
+
+    Dim folderPath As String
+    Dim fileName As String
+    Dim wb As Workbook
+    Dim wsSource As Worksheet
+    Dim wsDest As Worksheet
+    
+    Dim outputRow As Long
+    Dim i As Long
+    Dim caRow As Long, paRow As Long
+    Dim localID As String
+    
+    Application.ScreenUpdating = False
+    Application.DisplayAlerts = False
+    
+    folderPath = "C:\Users\bxb9893\OneDrive - JT International\Documents\!Tahseen Quayum\5000 IMS & QMS\QUIP\All QUIP CAPAs\"
+    
+    Set wsDest = ActiveSheet
+    
+    outputRow = 2
+    
+    'Clear previous data
+    wsDest.Range("A2:J" & wsDest.Rows.Count).ClearContents
+    
+    fileName = Dir(folderPath & "*.xls*")
+    
+    Do While fileName <> ""
+        
+        If folderPath & fileName <> ThisWorkbook.FullName Then
+            
+            Set wb = Workbooks.Open(folderPath & fileName, ReadOnly:=True)
+            Set wsSource = wb.Worksheets(1)
+            
+            localID = Left(fileName, InStrRev(fileName, ".") - 1)
+            
+            
+            '6 possible CAPA rows
+            For i = 0 To 5
+                
+                caRow = 43 + i
+                paRow = 52 + i
+                
+                'Only create output row if CA or PA exists
+                If Trim(wsSource.Range("E" & caRow).Value) <> "" _
+                Or Trim(wsSource.Range("E" & paRow).Value) <> "" Then
+                    
+                    wsDest.Cells(outputRow, "A").Value = localID
+                    
+                    'Corrective Action
+                    wsDest.Cells(outputRow, "C").Value = wsSource.Range("E" & caRow).Value
+                    wsDest.Cells(outputRow, "D").Value = wsSource.Range("AD" & caRow).Value
+                    wsDest.Cells(outputRow, "E").Value = wsSource.Range("AN" & caRow).Value
+                    wsDest.Cells(outputRow, "F").Value = wsSource.Range("AY" & caRow).Value
+                    
+                    'Preventive Action
+                    wsDest.Cells(outputRow, "G").Value = wsSource.Range("E" & paRow).Value
+                    wsDest.Cells(outputRow, "H").Value = wsSource.Range("AD" & paRow).Value
+                    wsDest.Cells(outputRow, "I").Value = wsSource.Range("AN" & paRow).Value
+                    wsDest.Cells(outputRow, "J").Value = wsSource.Range("AY" & paRow).Value
+                    
+                    outputRow = outputRow + 1
+                    
+                End If
+                
+            Next i
+            
+            wb.Close SaveChanges:=False
+            
+        End If
+        
+        fileName = Dir
+        
+    Loop
+    
+    Application.DisplayAlerts = True
+    Application.ScreenUpdating = True
+    
+    MsgBox "CAPA extraction complete. " & outputRow - 2 & " records extracted.", vbInformation
+
+End Sub
+
