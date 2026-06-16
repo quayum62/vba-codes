@@ -1,0 +1,36 @@
+Sub ListWorksheetsToNewSheet()
+    Dim ws As Worksheet
+    Dim newWs As Worksheet
+    Dim rowNum As Long
+    
+    ' Turn off screen updating to make the macro run faster
+    Application.ScreenUpdating = False
+    
+    ' Add a new sheet at the very beginning to hold the list
+    Set newWs = ThisWorkbook.Worksheets.Add(Before:=ThisWorkbook.Worksheets(1))
+    
+    ' Handle naming the sheet (and avoiding errors if the name already exists)
+    On Error Resume Next
+    newWs.Name = "Worksheet List"
+    On Error GoTo 0
+    
+    ' Set up headers
+    newWs.Range("A1").Value = "Worksheet Name"
+    newWs.Range("A1").Font.Bold = True
+    
+    rowNum = 2
+    ' Loop through all sheets in the workbook
+    For Each ws In ThisWorkbook.Worksheets
+        ' Skip the list sheet itself so it doesn't log its own name
+        If ws.Name <> newWs.Name Then
+            newWs.Cells(rowNum, 1).Value = ws.Name
+            rowNum = rowNum + 1
+        End If
+    Next ws
+    
+    ' Clean up the look
+    newWs.Columns("A").AutoFit
+    Application.ScreenUpdating = True
+    
+    MsgBox "Done! Listed " & (rowNum - 2) & " sheets.", vbInformation, "Success"
+End Sub
