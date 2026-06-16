@@ -4,6 +4,9 @@ Sub ExportSheetsAsWorkbooks()
     Dim newWb As Workbook
     Dim savePath As String
     Dim fileName As String
+    Dim fullFilePath As String
+    Dim skippedCount As Long
+    Dim createdCount As Long
     
     Application.ScreenUpdating = False
     Application.DisplayAlerts = False
@@ -11,13 +14,11 @@ Sub ExportSheetsAsWorkbooks()
     'Destination folder
     savePath = "C:\Users\bxb9893\OneDrive - JT International\Documents\!Tahseen Quayum\5000 IMS & QMS\QUIP\All QUIP CAPAs\"
     
+    skippedCount = 0
+    createdCount = 0
+    
     'Loop through all sheets
     For Each ws In ThisWorkbook.Worksheets
-        
-        'Copy sheet to a new workbook
-        ws.Copy
-        
-        Set newWb = ActiveWorkbook
         
         'Clean filename from sheet name
         fileName = ws.Name
@@ -31,17 +32,38 @@ Sub ExportSheetsAsWorkbooks()
         fileName = Replace(fileName, ">", "_")
         fileName = Replace(fileName, "|", "_")
         
-        'Save workbook
-        newWb.SaveAs Filename:=savePath & fileName & ".xlsx", _
-                     FileFormat:=xlOpenXMLWorkbook
+        fullFilePath = savePath & fileName & ".xlsx"
         
-        newWb.Close SaveChanges:=False
+        'Check if file already exists
+        If Dir(fullFilePath) <> "" Then
+        
+            skippedCount = skippedCount + 1
+        
+        Else
+        
+            'Copy sheet to new workbook
+            ws.Copy
+            
+            Set newWb = ActiveWorkbook
+            
+            'Save workbook
+            newWb.SaveAs Filename:=fullFilePath, _
+                         FileFormat:=xlOpenXMLWorkbook
+            
+            newWb.Close SaveChanges:=False
+            
+            createdCount = createdCount + 1
+        
+        End If
         
     Next ws
     
     Application.DisplayAlerts = True
     Application.ScreenUpdating = True
     
-    MsgBox "All sheets exported successfully!", vbInformation
+    MsgBox "Export complete!" & vbCrLf & _
+           "Created: " & createdCount & vbCrLf & _
+           "Skipped (already existed): " & skippedCount, _
+           vbInformation
 
 End Sub
