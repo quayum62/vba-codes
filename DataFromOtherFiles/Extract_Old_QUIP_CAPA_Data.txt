@@ -1,0 +1,83 @@
+Sub Extract_Old_QUIP_CAPA_Data()
+    Dim folderPath As String
+    Dim fileName As String
+    Dim wb As Workbook
+    Dim wsSource As Worksheet
+    Dim wsDest As Worksheet
+    Dim outputRow As Long
+    Dim localID As String
+    Dim dataCols As Variant
+    Dim i As Long
+    Dim col As String
+
+    Application.ScreenUpdating = False
+    Application.DisplayAlerts = False
+
+    folderPath = "C:\Users\bxb9893\OneDrive - JT International\Documents\!Tahseen Quayum\5000 IMS & QMS\QUIP\All QUIP CAPAs\"
+
+    Set wsDest = ActiveSheet
+    outputRow = wsDest.Cells(wsDest.Rows.Count, "A").End(xlUp).Row + 1
+
+    dataCols = Array("N", "AA", "AN", "BA", "BN")
+
+    fileName = Dir(folderPath & "*.xls*")
+
+    Do While fileName <> ""
+
+        If Left(fileName, 2) <> "~$" Then
+
+            localID = Left(fileName, InStrRev(fileName, ".") - 1)
+
+            If localID = "087-250928B PMD" _
+            Or localID = "081-Foreign Part 2025090985" _
+            Or localID = "079-Foreign Part 2025090984" _
+            Or localID = "077-Foreign Part 2025090983" _
+            Or localID = "075_250829 PMD QUIP" _
+            Or localID = "074_250829 PMD QUIP" Then
+
+                Set wb = Workbooks.Open(folderPath & fileName, ReadOnly:=True)
+                Set wsSource = wb.Worksheets(1)
+
+                For i = 0 To UBound(dataCols)
+                    col = dataCols(i)
+
+                    If Trim(wsSource.Range(col & 55).Value) <> "" _
+                    Or Trim(wsSource.Range(col & 64).Value) <> "" Then
+
+                        wsDest.Cells(outputRow, "A").Value = localID          'Local QUIP File ID
+                        'Column B (CAPA_Extant) intentionally left blank
+
+                        'CA block
+                        wsDest.Cells(outputRow, "C").Value = wsSource.Range(col & 55).Value  'ca
+                        wsDest.Cells(outputRow, "D").Value = wsSource.Range(col & 75).Value  'ca_resp
+                        wsDest.Cells(outputRow, "E").Value = wsSource.Range(col & 77).Value  'ca_target_date
+                        wsDest.Cells(outputRow, "F").Value = wsSource.Range(col & 80).Value  'ca_actual_date (status)
+
+                        'PA block
+                        wsDest.Cells(outputRow, "G").Value = wsSource.Range(col & 64).Value  'pa
+                        wsDest.Cells(outputRow, "H").Value = wsSource.Range(col & 75).Value  'pa_resp
+                        wsDest.Cells(outputRow, "I").Value = wsSource.Range(col & 77).Value  'pa_target_date
+                        wsDest.Cells(outputRow, "J").Value = wsSource.Range(col & 80).Value  'pa_actual_date (status)
+
+                        outputRow = outputRow + 1
+
+                    End If
+
+                Next i
+
+                wb.Close SaveChanges:=False
+
+            End If
+
+        End If
+
+        fileName = Dir
+
+    Loop
+
+    Application.DisplayAlerts = True
+    Application.ScreenUpdating = True
+
+    MsgBox "Old QUIP extraction complete. Data appended.", vbInformation
+End Sub
+
