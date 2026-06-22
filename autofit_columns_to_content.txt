@@ -1,0 +1,9 @@
+> right click on sheet name (bottom of the sheet)
+> View Code
+> Paste the following code
+
+          Private Sub Worksheet_Change(ByVal Target As Range)
+              Cells.EntireColumn.AutoFit
+          End Sub
+
+> Save
